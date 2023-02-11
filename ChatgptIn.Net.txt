@@ -1,0 +1,43 @@
+using System;
+using System.Net.Http;
+using System.Text;
+
+namespace ChatGPT_Example
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var apiKey = "your_api_key_here";
+            var requestUri = "https://api.openai.com/v1/engines/davinci/jobs";
+            var prompt = "Hello, how can I help you today?";
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+                var request = new {
+                    prompt = prompt,
+                    max_tokens = 100,
+                    n = 1,
+                    stop = null,
+                    temperature = 0.5
+                };
+
+                var response = client.PostAsync(requestUri, new StringContent(
+                    Newtonsoft.Json.JsonConvert.SerializeObject(request),
+                    Encoding.UTF8, "application/json")).Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = response.Content.ReadAsStringAsync().Result;
+                    Console.WriteLine(responseContent);
+                }
+                else
+                {
+                    Console.WriteLine("Request failed with status code: " + response.StatusCode);
+                }
+            }
+        }
+    }
+}
